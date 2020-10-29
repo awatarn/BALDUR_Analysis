@@ -162,8 +162,8 @@ beta_i = [0] * 52 # np.zeros(52, dtype=float)
 # page #2
 nD_i = [0] * 52 # np.zeros(52, dtype=float)
 nT_i = [0] * 52 # np.zeros(52, dtype=float)
-nBe_i = [0] * 52 # np.zeros(52, dtype=float)
-nHe3_i = [0] * 52 # np.zeros(52, dtype=float)
+nImp1_i = [0] * 52 # np.zeros(52, dtype=float)
+nImp2_i = [0] * 52 # np.zeros(52, dtype=float)
 zeff_i = [0] * 52 # np.zeros(52, dtype=float)
 # page #3
 elec_conduct_i  = [0] * 52 # np.zeros(52, dtype=float)
@@ -191,8 +191,8 @@ beta_list = []
 # page #2
 nD_list = []
 nT_list = []
-nBe_list = []
-nHe3_list = []
+nImp1_list = []
+nImp2_list = []
 zeff_list = []
 # page #3
 elec_conduct_list = []
@@ -210,6 +210,7 @@ ei_coupling_list = []
 i = 0
 zonei = 0
 for linei in lines1: # [:11400]:
+    i = i + 1 # count line number, the first line is line #1.
     # print("Line {}: {}".format(i, linei.strip()))
 
     # ---------------------- Check page #1 ------------------------------------ #
@@ -289,14 +290,14 @@ for linei in lines1: # [:11400]:
 
         temp_deuterium = linei[38:51]
         temp_tritium = linei[53:66]
-        temp_beryllium  = linei[68:81]
-        temp_helium  = linei[83:96]
+        temp_imp1  = linei[68:81]
+        temp_imp2  = linei[83:96]
         temp_zeff  = linei[98:]
 
         nD_i[zonei-1] = float(temp_deuterium)
         nT_i[zonei-1] = float(temp_tritium)
-        nBe_i[zonei-1] = float(temp_beryllium)
-        nHe3_i[zonei-1] = float(temp_helium)
+        nImp1_i[zonei-1] = float(temp_imp1)
+        nImp2_i[zonei-1] = float(temp_imp2)
         zeff_i[zonei-1] = float(temp_zeff)
     if linei.find("- 3-") != -1:
         # end of page#1 --> Reset variables
@@ -306,8 +307,8 @@ for linei in lines1: # [:11400]:
         # append data
         nD_list.append(nD_i.copy())
         nT_list.append(nT_i.copy())
-        nBe_list.append(nBe_i.copy())
-        nHe3_list.append(nHe3_i.copy())
+        nImp1_list.append(nImp1_i.copy())
+        nImp2_list.append(nImp2_i.copy())
         zeff_list.append(zeff_i.copy())
 
     # ---------------------- Check page #3 ------------------------------------ #
@@ -362,7 +363,7 @@ for linei in lines1: # [:11400]:
 
 
 
-    i = i + 1
+
 
 print("time_list = ",time_list)
 print("Total time slices = %5d"%(len(time_list)))
@@ -382,8 +383,8 @@ q_arr = np.array(q_list)
 beta_arr = np.array(beta_list)
 nD_arr = np.array(nD_list)
 nT_arr = np.array(nT_list)
-nBe_arr = np.array(nBe_list)
-nHe3_arr = np.array(nHe3_list)
+nImp1_arr = np.array(nImp1_list)
+nImp2_arr = np.array(nImp2_list)
 zeff_arr = np.array(zeff_list)
 
 
@@ -453,12 +454,12 @@ Plot1DTime_FixRad(nT_arr, Time1D, VariableName, RadList, title, Option_Save,File
 Plot1DTime_FixTime(nT_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
 ImshowPlot(nT_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
 
-# Page #2: Beryllium density
-title = 'nBe(r,t)'
-VariableName = 'nBe'
-Plot1DTime_FixRad(nBe_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
-Plot1DTime_FixTime(nBe_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(nBe_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+# Page #2: imp1 density
+title = 'nImp1(r,t)'
+VariableName = 'nImp1'
+Plot1DTime_FixRad(nImp1_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(nImp1_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(nImp1_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
 
 # Page #2: Zeff density
 title = 'Zeff(r,t)'
