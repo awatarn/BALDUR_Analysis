@@ -95,6 +95,15 @@ def Plot1DTime_FixTime(Prof2D, Time1D, VariableName, TimeList,title,  Option_Sav
         plt.show()
     plt.close()
 
+def CleanData(string1):
+    string1 = string1.replace('pc', '  ')
+    string1 = string1.replace('nc', '  ')
+    string1 = string1.replace('th', '  ')
+    string1 = string1.replace('lm', '  ')
+    string1 = string1.replace('o ', '  ')
+    string1 = string1.replace('- ', '  ')
+    return string1
+
 # Initiate the parser
 parser = argparse.ArgumentParser()
 
@@ -164,6 +173,7 @@ nD_i = [0] * 52 # np.zeros(52, dtype=float)
 nT_i = [0] * 52 # np.zeros(52, dtype=float)
 nImp1_i = [0] * 52 # np.zeros(52, dtype=float)
 nImp2_i = [0] * 52 # np.zeros(52, dtype=float)
+nImp3_i = [0] * 52 # np.zeros(52, dtype=float)
 zeff_i = [0] * 52 # np.zeros(52, dtype=float)
 # page #3
 elec_conduct_i  = [0] * 52 # np.zeros(52, dtype=float)
@@ -193,6 +203,7 @@ nD_list = []
 nT_list = []
 nImp1_list = []
 nImp2_list = []
+nImp3_list = []
 zeff_list = []
 # page #3
 elec_conduct_list = []
@@ -207,11 +218,14 @@ other_heating_list = []
 total_gain_list = []
 ei_coupling_list = []
 
+NoOfImp = 0
+
 i = 0
 zonei = 0
 for linei in lines1: # [:11400]:
     i = i + 1 # count line number, the first line is line #1.
     # print("Line {}: {}".format(i, linei.strip()))
+
 
     # ---------------------- Check page #1 ------------------------------------ #
     if linei.find("- 1-") != -1:
@@ -230,14 +244,17 @@ for linei in lines1: # [:11400]:
     if Page1Found == 1 and HeaderTeFound == 1 and zonei < 52:
         zonei += 1
 
-        temp_Te = linei[18:31]
-        temp_Ti = linei[33:45]
-        temp_ne = linei[48:60]
-        temp_ni = linei[60:72]
-        temp_vloop = linei[72:84]
-        temp_jz = linei[84:96]
-        temp_q = linei[96:108]
-        temp_beta = linei[108:]
+        linei = CleanData(linei)
+        temp1 = linei.split('  ') # split string
+        temp2 = [float(k) for k in temp1 if k!='']
+        temp_Te = temp2[2]
+        temp_Ti = temp2[3]
+        temp_ne = temp2[4]
+        temp_ni = temp2[5]
+        temp_vloop = temp2[6]
+        temp_jz = temp2[7]
+        temp_q = temp2[8]
+        temp_beta = temp2[9]
 
         Te_i[zonei - 1] = float(temp_Te)
         Ti_i[zonei - 1] = float(temp_Ti)
@@ -288,16 +305,32 @@ for linei in lines1: # [:11400]:
             # Data in the last zone is not available, so skip it
             continue
 
-        temp_deuterium = linei[38:51]
-        temp_tritium = linei[53:66]
-        temp_imp1  = linei[68:81]
-        temp_imp2  = linei[83:96]
-        temp_zeff  = linei[98:]
+        linei = CleanData(linei)
+        temp1 = linei.split('  ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        if NoOfImp == 0:
+            if len(temp2) == 9:
+                NoOfImp = 2
+            elif len(temp2) == 10:
+                NoOfImp = 3
+
+        temp_deuterium = temp2[4]
+        temp_tritium = temp2[5]
+        temp_imp1 = temp2[6]
+        temp_imp2 = temp2[7]
+        if NoOfImp == 2:
+            temp_zeff = temp2[8]
+        elif NoOfImp == 3:
+            temp_imp3 = temp2[8]
+            temp_zeff = temp2[9]
 
         nD_i[zonei-1] = float(temp_deuterium)
         nT_i[zonei-1] = float(temp_tritium)
         nImp1_i[zonei-1] = float(temp_imp1)
         nImp2_i[zonei-1] = float(temp_imp2)
+        if NoOfImp == 3:
+            nImp3_i[zonei-1] = float(temp_imp3)
         zeff_i[zonei-1] = float(temp_zeff)
     if linei.find("- 3-") != -1:
         # end of page#1 --> Reset variables
@@ -309,6 +342,8 @@ for linei in lines1: # [:11400]:
         nT_list.append(nT_i.copy())
         nImp1_list.append(nImp1_i.copy())
         nImp2_list.append(nImp2_i.copy())
+        if NoOfImp == 3:
+            nImp3_list.append(nImp3_i.copy())
         zeff_list.append(zeff_i.copy())
 
     # ---------------------- Check page #3 ------------------------------------ #
@@ -330,17 +365,23 @@ for linei in lines1: # [:11400]:
             continue
         if zonei == 51 or zonei == 52:
             continue
-        temp_elec_conduct = linei[9:20]
-        temp_elec_convect = linei[20:30]
-        temp_ion_conduct = linei[30:40]
-        temp_ion_convect = linei[40:50]
-        temp_neu_loss = linei[50:60]
-        temp_rad_loss = linei[60:70]
-        temp_ohmic_heating = linei[70:80]
-        temp_alpha_heating = linei[80:90]
-        temp_other_heating = linei[90:100]
-        temp_total_gain = linei[100:110]
-        temp_ei_coupling = linei[110:]
+
+        linei = CleanData(linei)
+        temp1 = linei.split('  ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        temp_elec_conduct = temp2[2]
+        temp_elec_convect = temp2[3]
+        temp_ion_conduct = temp2[4]
+        temp_ion_convect = temp2[5]
+        temp_neu_loss = temp2[6]
+        temp_rad_loss = temp2[7]
+        temp_ohmic_heating = temp2[8]
+        temp_alpha_heating = temp2[9]
+        temp_other_heating = temp2[10]
+        temp_total_gain = temp2[11]
+        temp_ei_coupling = temp2[12]
+
     if linei.find("- 4-") != -1:
         # end of page#1 --> Reset variables
         Page2Found = 0
@@ -358,12 +399,6 @@ for linei in lines1: # [:11400]:
         other_heating_list.append(other_heating_i.copy())
         total_gain_list.append(total_gain_i.copy())
         ei_coupling_list.append(ei_coupling_i.copy())
-
-
-
-
-
-
 
 print("time_list = ",time_list)
 print("Total time slices = %5d"%(len(time_list)))
@@ -385,6 +420,7 @@ nD_arr = np.array(nD_list)
 nT_arr = np.array(nT_list)
 nImp1_arr = np.array(nImp1_list)
 nImp2_arr = np.array(nImp2_list)
+nImp3_arr = np.array(nImp3_list)
 zeff_arr = np.array(zeff_list)
 
 
@@ -394,7 +430,7 @@ Option_Save = 1
 FilenamePrefix = "%s%s"%(MachineName, FolderCode)
 os.chdir(PathToJfile)
 
-idx = np.round(np.linspace(1,len(Time1D)-10, 5)).astype(int)
+idx = np.round(np.linspace(1,len(Time1D)-1, 5)).astype(int)
 TimeList = Time1D[idx]
 
 
@@ -460,6 +496,21 @@ VariableName = 'nImp1'
 Plot1DTime_FixRad(nImp1_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(nImp1_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
 ImshowPlot(nImp1_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #2: imp2 density
+title = 'nImp2(r,t)'
+VariableName = 'nImp2'
+Plot1DTime_FixRad(nImp2_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(nImp2_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(nImp2_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+if NoOfImp == 3:
+    # Page #2: imp3 density
+    title = 'nImp3(r,t)'
+    VariableName = 'nImp3'
+    Plot1DTime_FixRad(nImp3_arr, Time1D, VariableName, RadList, title, Option_Save, FilenamePrefix)
+    Plot1DTime_FixTime(nImp3_arr, Time1D, VariableName, TimeList, title, Option_Save, FilenamePrefix)
+    ImshowPlot(nImp3_arr, Time1D, VariableName, title, Option_Save, FilenamePrefix)
 
 # Page #2: Zeff density
 title = 'Zeff(r,t)'
