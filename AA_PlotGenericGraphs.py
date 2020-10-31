@@ -158,6 +158,19 @@ HeaderDeuteriumFound = 0
 # page #3
 Page3Found = 0
 HeaderEnergyLossesFound = 0
+# page #5 ( transport coefficients from theory)
+Page5Found = 0
+HeaderPage5Found = 0
+# page #6 ( ion thermal diffusion coefficients)
+Page6Found = 0
+HeaderPage6Found = 0
+# page #7
+Page7Found = 0
+HeaderPage7Found = 0
+# page #13 (Growth rates and frequencies)
+Page13Found = 0
+HeaderGrowthRatesFound = 0
+
 # 1d list
 # page #1
 Te_i = [0] * 52 # np.zeros(52, dtype=float)
@@ -187,6 +200,38 @@ alpha_heating_i  = [0] * 52 # np.zeros(52, dtype=float)
 other_heating_i  = [0] * 52 # np.zeros(52, dtype=float)
 total_gain_i  = [0] * 52 # np.zeros(52, dtype=float)
 ei_coupling_i  = [0] * 52 # np.zeros(52, dtype=float)
+# page #5
+rminor5_i = [0] * 52 # np.zeros(52, dtype=float)
+chie_i  = [0] * 52 # np.zeros(52, dtype=float)
+chii_i  = [0] * 52 # np.zeros(52, dtype=float)
+zdifh_i  = [0] * 52 # np.zeros(52, dtype=float)
+zdifz_i  = [0] * 52 # np.zeros(52, dtype=float)
+# page #6
+rminor6_i = [0] * 52 # np.zeros(52, dtype=float)
+thiig_i = [0] * 52 # np.zeros(52, dtype=float)
+thirb_i = [0] * 52 # np.zeros(52, dtype=float)
+thikb_i = [0] * 52 # np.zeros(52, dtype=float)
+xithe_i = [0] * 52 # np.zeros(52, dtype=float)
+neocl_i = [0] * 52 # np.zeros(52, dtype=float)
+empirc_i = [0] * 52 # np.zeros(52, dtype=float)
+xitot_i = [0] * 52 # np.zeros(52, dtype=float)
+# page #7
+rminor7_i = [0] * 52 # np.zeros(52, dtype=float)
+theig_i = [0] * 52 # np.zeros(52, dtype=float)
+therb_i = [0] * 52 # np.zeros(52, dtype=float)
+thekb_i = [0] * 52 # np.zeros(52, dtype=float)
+theeg_i = [0] * 52 # np.zeros(52, dtype=float)
+thetb_i = [0] * 52 # np.zeros(52, dtype=float)
+xethe_i = [0] * 52 # np.zeros(52, dtype=float)
+neocle_i = [0] * 52 # np.zeros(52, dtype=float)
+empirce_i = [0] * 52 # np.zeros(52, dtype=float)
+xetot_i = [0] * 52 # np.zeros(52, dtype=float)
+# page #13
+rminor13_i  = [0] * 52 # np.zeros(52, dtype=float)
+gITG_i  = [0] * 52 # np.zeros(52, dtype=float)
+oITG_i  = [0] * 52 # np.zeros(52, dtype=float)
+gTEM_i  = [0] * 52 # np.zeros(52, dtype=float)
+oTEM_i  = [0] * 52 # np.zeros(52, dtype=float)
 
 # page #1
 time_list = []
@@ -217,15 +262,49 @@ alpha_heating_list = []
 other_heating_list = []
 total_gain_list = []
 ei_coupling_list = []
+# page #5
+rminor5_list = []
+chie_list = []
+chii_list = []
+zdifh_list = []
+zdifz_list = []
+# page #6
+rminor6_list = []
+thiig_list = []
+thirb_list = []
+thikb_list = []
+xithe_list = []
+neocl_list = []
+empirc_list = []
+xitot_list = []
+# page #7
+rminor7_list = []
+theig_list = []
+therb_list = []
+thekb_list = []
+theeg_list = []
+thetb_list = []
+xethe_list = []
+neocle_list = []
+empirce_list = []
+xetot_list = []
+# page #13
+rminor13_list = []
+gITG_list = []
+oITG_list = []
+gTEM_list = []
+oTEM_list = []
 
 NoOfImp = 0
 
 i = 0
 zonei = 0
-for linei in lines1: # [:11400]:
+for linei in lines1: #[:54270]:
     i = i + 1 # count line number, the first line is line #1.
     # print("Line {}: {}".format(i, linei.strip()))
-
+    # print("%5d %5d %5d %5d"%(Page1Found, Page2Found, Page3Found, Page13Found))
+    # print("%5d %5d %5d %5d" % (HeaderTeFound, HeaderDeuteriumFound, HeaderEnergyLossesFound, HeaderGrowthRatesFound))
+    # print("%5d"%(zonei))
 
     # ---------------------- Check page #1 ------------------------------------ #
     if linei.find("- 1-") != -1:
@@ -245,7 +324,7 @@ for linei in lines1: # [:11400]:
         zonei += 1
 
         linei = CleanData(linei)
-        temp1 = linei.split('  ') # split string
+        temp1 = linei.split(' ') # split string
         temp2 = [float(k) for k in temp1 if k!='']
         temp_Te = temp2[2]
         temp_Ti = temp2[3]
@@ -306,7 +385,7 @@ for linei in lines1: # [:11400]:
             continue
 
         linei = CleanData(linei)
-        temp1 = linei.split('  ')  # split string
+        temp1 = linei.split(' ')  # split string
         temp2 = [float(k) for k in temp1 if k != '']
 
         if NoOfImp == 0:
@@ -357,17 +436,18 @@ for linei in lines1: # [:11400]:
         # print("Line of header Te is found.")
         HeaderEnergyLossesFound = 1
         continue
-    if Page3Found == 1 and HeaderEnergyLossesFound == 1 and linei.find("j    cm    conduct  convect."):
+    if Page3Found == 1 and HeaderEnergyLossesFound == 1 and linei.find("j    cm    conduct  convect.") != -1:
         continue
     if Page3Found == 1 and HeaderEnergyLossesFound == 1 and zonei < 52:
         zonei += 1
         if zonei == 1:
+            # zonei += 1
             continue
         if zonei == 51 or zonei == 52:
             continue
 
         linei = CleanData(linei)
-        temp1 = linei.split('  ')  # split string
+        temp1 = linei.split(' ')  # split string
         temp2 = [float(k) for k in temp1 if k != '']
 
         temp_elec_conduct = temp2[2]
@@ -382,10 +462,11 @@ for linei in lines1: # [:11400]:
         temp_total_gain = temp2[11]
         temp_ei_coupling = temp2[12]
 
+    # if Page3Found == 1 and HeaderEnergyLossesFound == 1 and linei.find('particles') != -1:
     if linei.find("- 4-") != -1:
         # end of page#1 --> Reset variables
-        Page2Found = 0
-        HeaderDeuteriumFound = 0
+        Page3Found = 0
+        HeaderEnergyLossesFound = 0
         zonei = 0
         # append data
         elec_conduct_list.append(elec_conduct_i.copy())
@@ -399,6 +480,180 @@ for linei in lines1: # [:11400]:
         other_heating_list.append(other_heating_i.copy())
         total_gain_list.append(total_gain_i.copy())
         ei_coupling_list.append(ei_coupling_i.copy())
+
+    # ---------------------- Check page #5 ------------------------------------ #
+    if linei.find("- 5-") != -1:
+        Page5Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(13,timei))
+        continue
+    if Page5Found == 1 and linei.find(" transport coefficients from theory") != -1:
+        HeaderPage5Found = 1
+        continue
+    if Page5Found == 1 and HeaderPage5Found == 1 and (linei == '\n' or linei.find("m*m/s") != -1 ):
+        continue
+    if Page5Found == 1 and HeaderPage5Found == 1 and linei.find('chi-elc        chi-ion') != -1:
+        continue
+    if Page5Found == 1 and HeaderPage5Found == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 1:
+            zonei += 1
+        if zonei == 52:
+            continue
+
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        # print(temp1)
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        rminor5_i[zonei - 1] = temp2[1]
+        chie_i[zonei - 1] = temp2[2]
+        chii_i[zonei - 1] = temp2[3]
+        zdifh_i[zonei - 1] = temp2[5]
+        zdifz_i[zonei - 1] = temp2[6]
+    if linei.find("- 6-") != -1:
+        Page5Found = 0
+        HeaderPage5Found = 0
+        zonei = 0
+        #append data
+        rminor5_list.append(rminor5_i.copy())
+        chie_list.append(chie_i.copy())
+        chii_list.append(chii_i.copy())
+        zdifh_list.append(zdifh_i.copy())
+        zdifz_list.append(zdifz_i.copy())
+
+    # ---------------------- Check page #6 ------------------------------------ #
+    if linei.find("- 6-") != -1:
+        Page6Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(6,timei))
+        continue
+    if Page6Found == 1 and linei.find("ion thermal diffusion coefficients") != -1:
+        HeaderPage6Found = 1
+        continue
+    if Page6Found == 1 and HeaderPage6Found == 1 and \
+        (linei.find("------------") != -1 or linei.find("m2/s") != -1 or linei.find("thiig") != -1):
+        continue
+    if Page6Found == 1 and HeaderPage6Found == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 52:
+            continue
+
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        rminor6_i[zonei - 1] = temp2[0]
+        thiig_i[zonei - 1] = temp2[1]
+        thirb_i[zonei - 1] = temp2[2]
+        thikb_i[zonei - 1] = temp2[3]
+        xithe_i[zonei - 1] = temp2[4]
+        neocl_i[zonei - 1] = temp2[5]
+        empirc_i[zonei - 1] = temp2[6]
+        xitot_i[zonei - 1] = temp2[7]
+
+    if linei.find("- 7-") != -1:
+        Page6Found = 0
+        HeaderPage6Found = 0
+        zonei = 0
+        # append data
+        rminor6_list.append(rminor6_i.copy())
+        thiig_list.append(thiig_i.copy())
+        thirb_list.append(thirb_i.copy())
+        thikb_list.append(thikb_i.copy())
+        xithe_list.append(xithe_i.copy())
+        neocl_list.append(neocl_i.copy())
+        empirc_list.append(empirc_i.copy())
+        xitot_list.append(xitot_i.copy())
+
+    # ---------------------- Check page #7 ------------------------------------ #
+    if linei.find("- 7-") != -1:
+        Page7Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(6,timei))
+        continue
+    if Page7Found == 1 and linei.find("electron thermal diffusion coefficients") != -1:
+        HeaderPage7Found = 1
+        continue
+    if Page7Found == 1 and HeaderPage7Found == 1 and (linei.find('---------------') != -1 or \
+            linei.find('m2/s        m2/s') != -1 or \
+            linei.find('theig       therb') != -1):
+        continue
+    if Page7Found == 1 and HeaderPage7Found == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 52:
+            continue
+
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        rminor7_i[zonei - 1] = temp2[0]
+        theig_i[zonei - 1] = temp2[1]
+        therb_i[zonei - 1] = temp2[2]
+        thekb_i[zonei - 1] = temp2[3]
+        theeg_i[zonei - 1] = temp2[4]
+        thetb_i[zonei - 1] = temp2[5]
+        xethe_i[zonei - 1] = temp2[6]
+        neocle_i[zonei - 1] = temp2[7]
+        empirce_i[zonei - 1] = temp2[8]
+        xetot_i[zonei - 1] = temp2[9]
+    if linei.find("- 8-") != -1:
+        Page7Found = 0
+        HeaderPage7Found = 0
+        zonei = 0
+        # append data
+        rminor7_list.append(rminor7_i.copy())
+        theig_list.append(theig_i.copy())
+        therb_list.append(therb_i.copy())
+        thekb_list.append(thekb_i.copy())
+        theeg_list.append(theeg_i.copy())
+        thetb_list.append(thetb_i.copy())
+        xethe_list.append(xethe_i.copy())
+        neocle_list.append(neocle_i.copy())
+        empirce_list.append(empirce_i.copy())
+        xetot_list.append(xetot_i.copy())
+
+    # ---------------------- Check page #13 ------------------------------------ #
+    if linei.find("-13-") != -1:
+        Page13Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(13,timei))
+        continue
+    if Page13Found == 1 and linei.find("Growth rates and frequencies:") != -1:
+        HeaderGrowthRatesFound = 1
+        continue
+    if Page13Found == 1 and HeaderGrowthRatesFound == 1 and linei.find('gamma_ITG') != -1:
+        continue
+    if Page13Found == 1 and HeaderGrowthRatesFound == 1 and zonei < 52:
+        zonei += 1
+
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        rminor13_i[zonei - 1] = temp2[0]
+        gITG_i[zonei - 1] = temp2[1]
+        oITG_i[zonei - 1] = temp2[2]
+        gTEM_i[zonei - 1] = temp2[3]
+        oTEM_i[zonei - 1] = temp2[4]
+    if linei.find("-14-") != -1:
+        Page13Found = 0
+        HeaderGrowthRatesFound = 0
+        zonei = 0
+        # append data
+        rminor13_list.append(rminor13_i.copy())
+        gITG_list.append(gITG_i.copy())
+        oITG_list.append(oITG_i.copy())
+        gTEM_list.append(gTEM_i.copy())
+        oTEM_list.append(oTEM_i.copy())
 
 print("time_list = ",time_list)
 print("Total time slices = %5d"%(len(time_list)))
@@ -422,6 +677,35 @@ nImp1_arr = np.array(nImp1_list)
 nImp2_arr = np.array(nImp2_list)
 nImp3_arr = np.array(nImp3_list)
 zeff_arr = np.array(zeff_list)
+rminor5_arr = np.array(rminor5_list)
+chie_arr = np.array(chie_list)
+chii_arr = np.array(chii_list)
+zdifh_arr = np.array(zdifh_list)
+zdifz_arr = np.array(zdifz_list)
+rminor6_arr = np.array(rminor6_list)
+thiig_arr = np.array(thiig_list)
+thirb_arr = np.array(thirb_list)
+thikb_arr = np.array(thikb_list)
+xithe_arr = np.array(xithe_list)
+neocl_arr = np.array(neocl_list)
+empirc_arr = np.array(empirc_list)
+xitot_arr = np.array(xitot_list)
+rminor7_arr = np.array(rminor7_list)
+theig_arr = np.array(theig_list)
+therb_arr = np.array(therb_list)
+thekb_arr = np.array(thekb_list)
+theeg_arr = np.array(theeg_list)
+thetb_arr = np.array(thetb_list)
+xethe_arr = np.array(xethe_list)
+neocle_arr = np.array(neocle_list)
+empirce_arr = np.array(empirce_list)
+xetot_arr = np.array(xetot_list)
+
+rminor13_arr = np.array(rminor13_list)
+gITG_arr = np.array(gITG_list)
+oITG_arr = np.array(oITG_list)
+gTEM_arr = np.array(gTEM_list)
+oTEM_arr = np.array(oTEM_list)
 
 
 RadList = [0, 10, 20, 30, 40]
@@ -519,7 +803,98 @@ Plot1DTime_FixRad(zeff_arr, Time1D, VariableName, RadList, title, Option_Save,Fi
 Plot1DTime_FixTime(zeff_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
 ImshowPlot(zeff_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
 
+# Page #5: chi-elec
+title = 'chi-e(r,t)'
+VariableName = 'chi-e'
+Plot1DTime_FixRad(chie_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(chie_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(chie_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
 
+# Page #5: chi-i
+title = 'chi-i(r,t)'
+VariableName = 'chi-i'
+Plot1DTime_FixRad(chii_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(chii_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(chii_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #5: zdifh
+title = 'zdifh(r,t)'
+VariableName = 'zdifh'
+Plot1DTime_FixRad(zdifh_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(zdifh_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(zdifh_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #5: zdifz
+title = 'zdifz(r,t)'
+VariableName = 'zdifz'
+Plot1DTime_FixRad(zdifz_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(zdifz_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(zdifz_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: thiig
+title = 'thiig(r,t)'
+VariableName = 'thiig'
+Plot1DTime_FixRad(thiig_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(thiig_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(thiig_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: thirb
+title = 'thirb(r,t)'
+VariableName = 'thirb'
+Plot1DTime_FixRad(thirb_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(thirb_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(thirb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: thikb
+title = 'thikb(r,t)'
+VariableName = 'thikb'
+Plot1DTime_FixRad(thikb_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(thikb_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(thikb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: xithe
+title = 'xithe(r,t)'
+VariableName = 'xithe'
+Plot1DTime_FixRad(xithe_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(xithe_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(xithe_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: neocl
+title = 'neocl(r,t)'
+VariableName = 'neocl'
+Plot1DTime_FixRad(neocl_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(neocl_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(neocl_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: empirc
+title = 'empirc(r,t)'
+VariableName = 'empirc'
+Plot1DTime_FixRad(empirc_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(empirc_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(empirc_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #6: xitot
+title = 'xitot(r,t)'
+VariableName = 'xitot'
+Plot1DTime_FixRad(xitot_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(xitot_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(xitot_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+
+
+# Page #13: gamma_ITG
+title = 'gamma_ITG(r,t)'
+VariableName = 'gamma_ITG'
+Plot1DTime_FixRad(gITG_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(gITG_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(gITG_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+
+# Page #13: gamma_TEM
+title = 'gamma_TEM(r,t)'
+VariableName = 'gamma_TEM'
+Plot1DTime_FixRad(gTEM_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
+Plot1DTime_FixTime(gTEM_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
+ImshowPlot(gTEM_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
 
 
 
