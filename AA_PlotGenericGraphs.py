@@ -1,108 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from cycler import cycler
 import os
 import argparse # Include standard modules
+from My_Function import *
 
-def ImshowPlot(Prof2D, Time1D, VariableName, title, Option_Save=0, FilenamePrefix='test'):
-    # Prof2D = Te_arr
-    # title = 'Te(r,t)'
-    # VariableName = 'Te'
-    # Option_Save = 1
-    # FilenamePrefix = 'itera002'
-
-    Filename = "Plot2D_Imshow_%s_%s.png"%(FilenamePrefix,VariableName)
-    plt.figure()
-    plt.imshow(Prof2D, extent=[0, 1, Time1D[-1], Time1D[0]], aspect='auto')
-    plt.set_cmap('jet')
-    # plt.imshow(Prof2D, aspect='auto')
-    plt.gca().invert_yaxis()
-    plt.colorbar()
-    plt.xlabel('R/a')
-    plt.title(title)
-    plt.ylabel('Time [ms]')
-    print("Function : ImshowPlot()")
-    print("Variable : %s"%(VariableName))
-    if Option_Save == 1:
-        print("Save figure to : %s \n"%(Filename))
-        plt.savefig(Filename, bbox_inches='tight')
-    else:
-        plt.show()
-    plt.close()
-
-def Plot1DTime_FixRad(Prof2D, Time1D, VariableName, Zone, title, Option_Save, FilenamePrefix):
-
-    # Prof2D = Te_arr
-    # title = 'Te(r,t)'
-    # VariableName = 'Te'
-    # Option_Save = 1
-    # FilenamePrefix = 'itera002'
-    # Zone = [0, 10,25]
-
-    print("Function : Plot1DTime_FixRad()")
-    print("Variable : %s" % (VariableName))
-
-    Filename = "Plot1D_Time_%s_%s.png"%(FilenamePrefix,VariableName)
-    i = 0
-    plt.figure()
-    plt.rc('axes', prop_cycle=(cycler('color', ['#9400D3', '#0000FF', '#00FF00', '#FF7F00', '#FF0000', '#8B0000']) +
-                               cycler('linestyle', ['-', '-', '-', '-', '-', '-'])))
-    for Zonei in Zone:
-        labeli = "r = %2d/52"%(Zonei)
-        plt.plot(Prof2D[:,Zonei], label=labeli)
-        i += 1
-    plt.xlabel('Time [ms]')
-    ylabel = "%s(r, t)"%(VariableName)
-    plt.ylabel(ylabel)
-    plt.legend()
-    if Option_Save == 1:
-        print("Save figure to : %s \n" % (Filename))
-        plt.savefig(Filename, bbox_inches='tight')
-    else:
-        plt.show()
-    plt.close()
-# Plot1DTime_FixTime(Te_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-def Plot1DTime_FixTime(Prof2D, Time1D, VariableName, TimeList,title,  Option_Save, FilenamePrefix):
-    # Prof2D = Te_arr
-    # title = 'Te(r,t)'
-    # VariableName = 'Te'
-    # Option_Save = 1
-    # FilenamePrefix = 'itera002'
-    # TimeList = [12000, 22000, 3000000]
-
-    print("Function : Plot1DTime_FixTime()")
-    print("Variable : %s" % (VariableName))
-
-    Filename = "Plot1D_Rad_%s_%s.png"%(FilenamePrefix,VariableName)
-    plt.figure()
-    plt.rc('axes', prop_cycle=(cycler('color', ['#9400D3', '#0000FF', '#00FF00', '#FF7F00', '#FF0000', '#8B0000']) +
-                               cycler('linestyle', ['-', '-', '-', '-', '-', '-'])))
-    for timei in TimeList:
-        index = np.where(Time1D<timei)[0][-1]
-        # print(index)
-        LowerTime = Time1D[index]
-        labeli = "Time = %8.4e ms"%(LowerTime)
-        plt.plot(Prof2D[index,:],label=labeli)
-
-    plt.title(title)
-    plt.xlabel('Zone')
-    plt.ylabel(VariableName)
-    plt.legend()
-    if Option_Save == 1:
-        print("Save figure to : %s \n" % (Filename))
-        plt.savefig(Filename,  bbox_inches='tight')
-    else:
-        plt.show()
-    plt.close()
-
-def CleanData(string1):
-    string1 = string1.replace('pc', '  ')
-    string1 = string1.replace('nc', '  ')
-    string1 = string1.replace('th', '  ')
-    string1 = string1.replace('lm', '  ')
-    string1 = string1.replace('o ', '  ')
-    string1 = string1.replace('- ', '  ')
-    return string1
 
 # Initiate the parser
 parser = argparse.ArgumentParser()
@@ -111,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", "-d", help="Set device name, i.e. iter, jet, etc.")
 parser.add_argument("--series", "-s", help="Set series code for running simulations, i.e. a001, a002, etc.")
 parser.add_argument("--path", "-p", help="Set path to the data folder, default = .")
+parser.add_argument("--time0", "-t0", help="Set an initial time for plotting (round to an lower value), default = 1.0 ms")
 
 # Read arguments from the command line
 args = parser.parse_args()
@@ -137,6 +38,13 @@ if args.path:
 else:
     print("Path to the data folder = %s (default)"%("."))
     PathToDataFolder = "."
+
+if args.time0:
+    print("An initial time for plotting = %s"%(args.time0))
+    time0 = float(args.time0)
+else:
+    print("An initial time for plotting = %s (default"%("1.0"))
+    time0 = 1.0
 
 print("@ =================================================================== @")
 
@@ -1013,79 +921,86 @@ Option_Save = 1
 FilenamePrefix = "%s%s"%(MachineName, FolderCode)
 os.chdir(PathToJfile)
 
-idx = np.round(np.linspace(1,len(Time1D)-1, 5)).astype(int)
+# https://stackoverflow.com/questions/9542738/python-find-in-list
+# time0upper = next((x for x in Time1D if time0 < x),None)
+# time0upper_idx = Time1D.index(time0upper)
+time0lower = np.where(Time1D<time0)
+time0lower_index = time0lower[0][-1]
+
+idx = np.round(np.linspace(time0lower_index,len(Time1D)-2, 5)).astype(int)
 TimeList = Time1D[idx]
 
+print(TimeList)
 
 # Page #1: TE
 title = 'Te(r,t)'
 VariableName = 'Te'
 Plot1DTime_FixRad(Te_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(Te_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(Te_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(Te_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #1: TI
 title = 'Ti(r,t)'
 VariableName = 'Ti'
 Plot1DTime_FixRad(Ti_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(Ti_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(Ti_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(Ti_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #1: NE
 title = 'ne(r,t)'
 VariableName = 'ne'
 Plot1DTime_FixRad(ne_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(ne_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(ne_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(ne_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #1: NI
 title = 'ni(r,t)'
 VariableName = 'ni'
 Plot1DTime_FixRad(ni_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(ni_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(ni_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(ni_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #1: q
 title = 'q(r,t)'
 VariableName = 'q'
 Plot1DTime_FixRad(q_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(q_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(q_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(q_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #1: beta
 title = 'beta(r,t)'
 VariableName = 'beta'
 Plot1DTime_FixRad(beta_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(beta_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(beta_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(beta_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #2: Deuterium density
 title = 'nD(r,t)'
 VariableName = 'nD'
 Plot1DTime_FixRad(nD_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(nD_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(nD_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(nD_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #2: Tritium density
 title = 'nT(r,t)'
 VariableName = 'nT'
 Plot1DTime_FixRad(nT_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(nT_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(nT_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(nT_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #2: imp1 density
 title = 'nImp1(r,t)'
 VariableName = 'nImp1'
 Plot1DTime_FixRad(nImp1_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(nImp1_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(nImp1_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(nImp1_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #2: imp2 density
 title = 'nImp2(r,t)'
 VariableName = 'nImp2'
 Plot1DTime_FixRad(nImp2_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(nImp2_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(nImp2_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(nImp2_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 if NoOfImp == 3:
     # Page #2: imp3 density
@@ -1093,42 +1008,42 @@ if NoOfImp == 3:
     VariableName = 'nImp3'
     Plot1DTime_FixRad(nImp3_arr, Time1D, VariableName, RadList, title, Option_Save, FilenamePrefix)
     Plot1DTime_FixTime(nImp3_arr, Time1D, VariableName, TimeList, title, Option_Save, FilenamePrefix)
-    ImshowPlot(nImp3_arr, Time1D, VariableName, title, Option_Save, FilenamePrefix)
+    ImshowPlot(nImp3_arr, Time1D, VariableName, title, Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #2: Zeff density
 title = 'Zeff(r,t)'
 VariableName = 'Zeff'
 Plot1DTime_FixRad(zeff_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(zeff_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(zeff_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(zeff_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #5: chi-elec
 title = 'chi-e(r,t)'
 VariableName = 'chi-e'
 Plot1DTime_FixRad(chie_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(chie_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(chie_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(chie_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #5: chi-i
 title = 'chi-i(r,t)'
 VariableName = 'chi-i'
 Plot1DTime_FixRad(chii_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(chii_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(chii_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(chii_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #5: zdifh
 title = 'zdifh(r,t)'
 VariableName = 'zdifh'
 Plot1DTime_FixRad(zdifh_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(zdifh_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(zdifh_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(zdifh_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #5: zdifz
 title = 'zdifz(r,t)'
 VariableName = 'zdifz'
 Plot1DTime_FixRad(zdifz_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(zdifz_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(zdifz_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(zdifz_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 if lthery21 == 10:
 
@@ -1137,49 +1052,49 @@ if lthery21 == 10:
     VariableName = 'thiig'
     Plot1DTime_FixRad(thiig_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(thiig_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(thiig_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(thiig_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: thirb
     title = 'thirb(r,t)'
     VariableName = 'thirb'
     Plot1DTime_FixRad(thirb_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(thirb_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(thirb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(thirb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: thikb
     title = 'thikb(r,t)'
     VariableName = 'thikb'
     Plot1DTime_FixRad(thikb_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(thikb_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(thikb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(thikb_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: xithe
     title = 'xithe(r,t)'
     VariableName = 'xithe'
     Plot1DTime_FixRad(xithe_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(xithe_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(xithe_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(xithe_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: neocl
     title = 'neocl(r,t)'
     VariableName = 'neocl'
     Plot1DTime_FixRad(neocl_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(neocl_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(neocl_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(neocl_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: empirc
     title = 'empirc(r,t)'
     VariableName = 'empirc'
     Plot1DTime_FixRad(empirc_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(empirc_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(empirc_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(empirc_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
     # Page #6: xitot
     title = 'xitot(r,t)'
     VariableName = 'xitot'
     Plot1DTime_FixRad(xitot_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
     Plot1DTime_FixTime(xitot_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-    ImshowPlot(xitot_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+    ImshowPlot(xitot_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 elif lthery21 == 8: # Mixed B/gB
     VariableList = [Xi_Bohm_arr, Xi_gBohm_arr, Xi_Mixed_arr, Xi_Neo_arr, Xi_Empirc_arr, Xi_Total_arr]
     TitleList = ['Xi_Bohm(r,t)', 'Xi_gBohm(r,t)', 'Xi_Mixed(r,t)', 'Xi_Neo(r,t)', 'Xi_Empirc(r,t)', 'Xi_Total(r,t)']
@@ -1190,7 +1105,7 @@ elif lthery21 == 8: # Mixed B/gB
                           FilenamePrefix)
         Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
                            FilenamePrefix)
-        ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix)
+        ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #7:
 if lthery21 == 10: # MMM
@@ -1210,7 +1125,7 @@ for i in range(0, len(VariableList)):
                       FilenamePrefix)
     Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
                        FilenamePrefix)
-    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 
 # Page #8:
@@ -1226,7 +1141,7 @@ elif lthery21 == 8: # Mixed B/gB
 for i in range(0, len(VariableList)):
     Plot1DTime_FixRad(VariableList[i], Time1D, VariableNameList[i], RadList, TitleList[i], Option_Save, FilenamePrefix)
     Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save, FilenamePrefix)
-    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #9:
 if lthery21 == 10: # MMM
@@ -1244,21 +1159,21 @@ for i in range(0, len(VariableList)):
                       FilenamePrefix)
     Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
                        FilenamePrefix)
-    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #13: gamma_ITG
 title = 'gamma_ITG(r,t)'
 VariableName = 'gamma_ITG'
 Plot1DTime_FixRad(gITG_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(gITG_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(gITG_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(gITG_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #13: gamma_TEM
 title = 'gamma_TEM(r,t)'
 VariableName = 'gamma_TEM'
 Plot1DTime_FixRad(gTEM_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(gTEM_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
-ImshowPlot(gTEM_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix)
+ImshowPlot(gTEM_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
 
 
 
