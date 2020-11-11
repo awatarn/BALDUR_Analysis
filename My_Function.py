@@ -53,12 +53,13 @@ def Plot1DTime_FixRad(Prof2D, Time1D, VariableName, Zone, title, Option_Save, Fi
                                cycler('linestyle', ['-', '-', '-', '-', '-', '-'])))
     for Zonei in Zone:
         labeli = "r = %2d/52"%(Zonei)
-        plt.plot(Prof2D[:,Zonei], label=labeli)
+        plt.plot(Time1D, Prof2D[:,Zonei], label=labeli)
         i += 1
     plt.xlabel('Time [ms]')
     ylabel = "%s(r, t)"%(VariableName)
     plt.ylabel(ylabel)
     plt.legend()
+    plt.title(title)
     if Option_Save == 1:
         print("Save figure to : %s \n" % (Filename))
         plt.savefig(Filename, bbox_inches='tight')
@@ -90,6 +91,9 @@ def Plot1DTime_FixTime(Prof2D, Time1D, VariableName, TimeList,title,  Option_Sav
         LowerTime = Time1D[index]
         labeli = "Time = %8.4e ms"%(LowerTime)
         plt.plot(Prof2D[index,:],label=labeli)
+        # print('LowerTime = ',LowerTime,'timei = ',timei,' ',Time1D.shape,' // ',Prof2D.shape)
+        # print('index = ',index)
+        # print('      = ',Prof2D[index,:])
 
     plt.title(title)
     plt.xlabel('Zone')

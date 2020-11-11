@@ -81,6 +81,9 @@ HeaderPage8Found = 0
 # page #9
 Page9Found = 0
 HeaderPage9Found = 0
+# page #10
+Page10Found = 0
+HeaderPage10Found = 0
 # page #13 (Growth rates and frequencies)
 Page13Found = 0
 HeaderGrowthRatesFound = 0
@@ -183,6 +186,17 @@ empircz_i = [0] * 52 # np.zeros(52, dtype=float)
 dztot_i = [0] * 52 # np.zeros(52, dtype=float)
 # Mixed B/gB
 X_Impuirity_i = [0] * 52 # np.zeros(52, dtype=float)
+
+# page #10
+rminor10_i = [0] * 52 # np.zeros(52, dtype=float)
+grdne_i = [0] * 52 # np.zeros(52, dtype=float)
+grdni_i = [0] * 52 # np.zeros(52, dtype=float)
+grdnh_i = [0] * 52 # np.zeros(52, dtype=float)
+grdnz_i = [0] * 52 # np.zeros(52, dtype=float)
+grdte_i = [0] * 52 # np.zeros(52, dtype=float)
+grdti_i = [0] * 52 # np.zeros(52, dtype=float)
+grdpr_i = [0] * 52 # np.zeros(52, dtype=float)
+grdq_i = [0] * 52 # np.zeros(52, dtype=float)
 
 # page #13
 rminor13_i  = [0] * 52 # np.zeros(52, dtype=float)
@@ -289,6 +303,17 @@ dztot_list = []
 # Mixed B/gB
 X_Impuirity_list = []
 
+# page #10
+rminor10_list = []
+grdne_list = []
+grdni_list = []
+grdnh_list = []
+grdnz_list = []
+grdte_list = []
+grdti_list = []
+grdpr_list = []
+grdq_list = []
+
 # page #13
 rminor13_list = []
 gITG_list = []
@@ -302,6 +327,7 @@ NoOfImp = 0
 
 i = 0
 zonei = 0
+Counter = 0
 for linei in lines1: #[:54270]:
     i = i + 1 # count line number, the first line is line #1.
     # print("Line {}: {}".format(i, linei.strip()))
@@ -328,14 +354,18 @@ for linei in lines1: #[:54270]:
             elif lthery21 == 23:
                 print("glf23")
             print("\n")
-
+    # ---------------------- Check the page at 0.000 ms------------------------ #
+    if linei.find("*** time step    0 ***") != -1:
+        # skip this time step
+        continue
 
     # ---------------------- Check page #1 ------------------------------------ #
-    if linei.find("- 1-") != -1:
+    if linei.find("- 1-  *** time") != -1:
         Page1Found = 1
         timei = float(linei[51:64])
-        time_list.append(timei)
-        print("Page#%2d, time = %14f ms"%(1,timei))
+        # time_list.append(timei)
+        Counter += 1
+        print("Record #%5d, time = %14f ms"%(Counter,timei))
         continue
     if Page1Found == 1 and linei.find("te    reg      ti    reg") != -1:
         # print("Line of header Te is found.")
@@ -367,12 +397,15 @@ for linei in lines1: #[:54270]:
         jz_i[zonei - 1] = float(temp_jz)
         q_i[zonei - 1] = float(temp_q)
         beta_i[zonei - 1] = float(temp_beta)
-    if linei.find("- 2-") != -1:
+    if linei.find("- 2-  *** time") != -1 and Page1Found == 1:
     # if Page1Found == 1 and HeaderTeFound == 1 and linei.find("BALDPN") != -1:
         # end of page#1 --> Reset variables
         Page1Found = 0
         HeaderTeFound = 0
         zonei = 0
+
+        time_list.append(timei)
+
         # append data
         Te_list.append(Te_i.copy())
         Ti_list.append(Ti_i.copy())
@@ -384,7 +417,7 @@ for linei in lines1: #[:54270]:
         beta_list.append(beta_i.copy())
 
     # ---------------------- Check page #2 ------------------------------------ #
-    if linei.find("- 2-") != -1:
+    if linei.find("- 2-  *** time") != -1:
         Page2Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -435,7 +468,7 @@ for linei in lines1: #[:54270]:
         if NoOfImp == 3:
             nImp3_i[zonei-1] = float(temp_imp3)
         zeff_i[zonei-1] = float(temp_zeff)
-    if linei.find("- 3-") != -1:
+    if linei.find("- 3-  *** time") != -1:
         # end of page#1 --> Reset variables
         Page2Found = 0
         HeaderDeuteriumFound = 0
@@ -450,7 +483,7 @@ for linei in lines1: #[:54270]:
         zeff_list.append(zeff_i.copy())
 
     # ---------------------- Check page #3 ------------------------------------ #
-    if linei.find("- 3-") != -1:
+    if linei.find("- 3-  *** time") != -1:
         Page3Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -487,7 +520,7 @@ for linei in lines1: #[:54270]:
         temp_ei_coupling = temp2[12]
 
     # if Page3Found == 1 and HeaderEnergyLossesFound == 1 and linei.find('particles') != -1:
-    if linei.find("- 4-") != -1:
+    if linei.find("- 4-  *** time") != -1:
         # end of page#1 --> Reset variables
         Page3Found = 0
         HeaderEnergyLossesFound = 0
@@ -506,7 +539,7 @@ for linei in lines1: #[:54270]:
         ei_coupling_list.append(ei_coupling_i.copy())
 
     # ---------------------- Check page #5 ------------------------------------ #
-    if linei.find("- 5-") != -1:
+    if linei.find("- 5-  *** time") != -1:
         Page5Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -537,7 +570,7 @@ for linei in lines1: #[:54270]:
         chii_i[zonei - 1] = temp2[3]
         zdifh_i[zonei - 1] = temp2[5]
         zdifz_i[zonei - 1] = temp2[6]
-    if linei.find("- 6-") != -1:
+    if linei.find("- 6-  *** time") != -1:
         Page5Found = 0
         HeaderPage5Found = 0
         zonei = 0
@@ -549,7 +582,7 @@ for linei in lines1: #[:54270]:
         zdifz_list.append(zdifz_i.copy())
 
     # ---------------------- Check page #6 ------------------------------------ #
-    if linei.find("- 6-") != -1:
+    if linei.find("- 6-  *** time") != -1:
         Page6Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -591,7 +624,7 @@ for linei in lines1: #[:54270]:
 
 
 
-    if linei.find("- 7-") != -1:
+    if linei.find("- 7-  *** time") != -1:
         Page6Found = 0
         HeaderPage6Found = 0
         zonei = 0
@@ -615,7 +648,7 @@ for linei in lines1: #[:54270]:
             Xi_Total_list.append(Xi_Total_i.copy())
 
     # ---------------------- Check page #7 ------------------------------------ #
-    if linei.find("- 7-") != -1:
+    if linei.find("- 7-  *** time") != -1:
         Page7Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -658,7 +691,7 @@ for linei in lines1: #[:54270]:
             Xe_Empirc_i[zonei - 1] = temp2[5]
             Xe_Total_i[zonei - 1] = temp2[6]
 
-    if linei.find("- 8-") != -1:
+    if linei.find("- 8-  *** time") != -1:
         Page7Found = 0
         HeaderPage7Found = 0
         zonei = 0
@@ -683,7 +716,7 @@ for linei in lines1: #[:54270]:
             Xe_Total_list.append(Xe_Total_i.copy())
 
     # ---------------------- Check page #8 ------------------------------------ #
-    if linei.find("- 8-") != -1:
+    if linei.find("- 8-  *** time") != -1:
         Page8Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -715,7 +748,7 @@ for linei in lines1: #[:54270]:
         elif lthery21 == 8: # Mixed B/gB
             rminor8_i[zonei - 1] = temp2[0]
             X_Particle_i[zonei - 1] = temp2[1]
-    if linei.find("- 9-") != -1:
+    if linei.find("- 9-  *** time") != -1:
         Page8Found = 0
         HeaderPage8Found = 0
         zonei = 0
@@ -731,7 +764,7 @@ for linei in lines1: #[:54270]:
             X_Particle_list.append(X_Particle_i.copy())
 
     # ---------------------- Check page #9 ------------------------------------ #
-    if linei.find("- 9-") != -1:
+    if linei.find("- 9-  *** time") != -1:
         Page9Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -750,7 +783,7 @@ for linei in lines1: #[:54270]:
 
         if zonei == 52:
             continue
-
+        # print("Page 9:",linei)
         linei = CleanData(linei)
         temp1 = linei.split(' ')  # split string
         temp2 = [float(k) for k in temp1 if k != '']
@@ -769,13 +802,13 @@ for linei in lines1: #[:54270]:
         elif lthery21 == 8: # Mixed B/gB
             rminor9_i[zonei - 1] = temp2[0]
             X_Impuirity_i[zonei - 1] = temp2[1]
-    if linei.find("-10-") != -1:
+    if linei.find("-10-  *** time") != -1:
         Page9Found = 0
         HeaderPage9Found = 0
         zonei = 0
         # append data
         if lthery21 == 10: # MMM
-            rminor9_list.append(rminor8_i.copy())
+            rminor9_list.append(rminor9_i.copy())
             tzdig_list.append(tzdig_i.copy())
             tzdrb_list.append(tzdrb_i.copy())
             thzkb_list.append(thzkb_i.copy())
@@ -788,9 +821,55 @@ for linei in lines1: #[:54270]:
             rminor9_list.append(rminor8_i.copy())
             X_Impuirity_list.append(X_Impuirity_i.copy())
 
+    # ---------------------- Check page #10 ------------------------------------ #
+    if linei.find("-10-  *** time") != -1:
+        Page10Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(13,timei))
+        continue
+    if Page10Found == 1 and HeaderPage10Found == 1 and (linei.find(' grdne       grdni') != -1):
+        continue
+    if Page10Found == 1 and HeaderPage10Found == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 52:
+            continue
+
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        rminor10_i[zonei - 1] = temp2[0]
+        grdne_i[zonei - 1] = temp2[1]
+        grdni_i[zonei - 1] = temp2[2]
+        grdnh_i[zonei - 1] = temp2[3]
+        grdnz_i[zonei - 1] = temp2[4]
+        grdte_i[zonei - 1] = temp2[5]
+        grdti_i[zonei - 1] = temp2[6]
+        grdpr_i[zonei - 1] = temp2[7]
+        grdq_i[zonei - 1] = temp2[8]
+    if Page10Found == 1 and linei.find("Normalized gradients:") != -1:
+        HeaderPage10Found = 1
+        continue
+    if linei.find("-11-  *** time") != -1:
+
+        Page10Found = 0
+        HeaderPage10Found = 0
+        zonei = 0
+        # append data
+        rminor10_list.append(rminor10_i.copy())
+        grdne_list.append(grdne_i.copy())
+        grdni_list.append(grdni_i.copy())
+        grdnh_list.append(grdnh_i.copy())
+        grdnz_list.append(grdnz_i.copy())
+        grdte_list.append(grdte_i.copy())
+        grdti_list.append(grdti_i.copy())
+        grdpr_list.append(grdpr_i.copy())
+        grdq_list.append(grdq_i.copy())
 
     # ---------------------- Check page #13 ------------------------------------ #
-    if linei.find("-13-") != -1:
+    if linei.find("-13-  *** time") != -1:
         Page13Found = 1
         # timei = float(linei[51:64])
         # time_list.append(timei)
@@ -813,7 +892,7 @@ for linei in lines1: #[:54270]:
         oITG_i[zonei - 1] = temp2[2]
         gTEM_i[zonei - 1] = temp2[3]
         oTEM_i[zonei - 1] = temp2[4]
-    if linei.find("-14-") != -1:
+    if linei.find("-14-  *** time") != -1:
         Page13Found = 0
         HeaderGrowthRatesFound = 0
         zonei = 0
@@ -824,8 +903,8 @@ for linei in lines1: #[:54270]:
         gTEM_list.append(gTEM_i.copy())
         oTEM_list.append(oTEM_i.copy())
 
-print("time_list = ",time_list)
-print("Total time slices = %5d"%(len(time_list)))
+# print("time_list = ",time_list)
+print("@ === Total time slices = %5d"%(len(time_list)))
 # print(Te_list)
 # print(len(Te_list))
 
@@ -908,6 +987,16 @@ if lthery21 == 10: # MMM
 elif lthery21 == 8: # Mixed B/gB
     X_Impuirity_arr = np.array(X_Impuirity_list)
 
+rminor10_arr = np.array(rminor10_list)
+grdne_arr = np.array(grdne_list)
+grdni_arr = np.array(grdni_list)
+grdnh_arr = np.array(grdnh_list)
+grdnz_arr = np.array(grdnz_list)
+grdte_arr = np.array(grdte_list)
+grdti_arr = np.array(grdti_list)
+grdpr_arr = np.array(grdpr_list)
+grdq_arr = np.array(grdq_list)
+
 rminor13_arr = np.array(rminor13_list)
 gITG_arr = np.array(gITG_list)
 oITG_arr = np.array(oITG_list)
@@ -930,7 +1019,8 @@ time0lower_index = time0lower[0][-1]
 idx = np.round(np.linspace(time0lower_index,len(Time1D)-2, 5)).astype(int)
 TimeList = Time1D[idx]
 
-print(TimeList)
+print("TimeList = ",TimeList)
+print("\n")
 
 # Page #1: TE
 title = 'Te(r,t)'
@@ -1160,6 +1250,19 @@ for i in range(0, len(VariableList)):
     Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
                        FilenamePrefix)
     ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
+
+# Page #10:
+VariableList = [grdne_arr, grdni_arr, grdnh_arr,  grdnz_arr, grdte_arr, grdti_arr, grdpr_arr, grdq_arr]
+TitleList = ['grdne(r,t)', 'grdni(r,t)', 'grdnh(r,t)', 'grdnz(r,t)', 'grdte(r,t)', 'grdti(r,t)', 'grdpr(r,t)', 'grdq(r,t)']
+VariableNameList = ['grdne', 'grdni', 'grdnh', 'grdnz', 'grdte', 'grdti', 'grdpr', 'grdq']
+
+for i in range(0, len(VariableList)):
+    Plot1DTime_FixRad(VariableList[i], Time1D, VariableNameList[i], RadList, TitleList[i], Option_Save,
+                      FilenamePrefix)
+    Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
+                       FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
+
 
 # Page #13: gamma_ITG
 title = 'gamma_ITG(r,t)'
