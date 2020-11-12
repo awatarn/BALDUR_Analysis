@@ -84,6 +84,9 @@ HeaderPage9Found = 0
 # page #10
 Page10Found = 0
 HeaderPage10Found = 0
+# page #12
+Page12Found = 0
+HeaderPage12Found = 0
 # page #13 (Growth rates and frequencies)
 Page13Found = 0
 HeaderGrowthRatesFound = 0
@@ -197,6 +200,18 @@ grdte_i = [0] * 52 # np.zeros(52, dtype=float)
 grdti_i = [0] * 52 # np.zeros(52, dtype=float)
 grdpr_i = [0] * 52 # np.zeros(52, dtype=float)
 grdq_i = [0] * 52 # np.zeros(52, dtype=float)
+
+# page #12
+xbouni12_i = [0] * 52 # np.zeros(52, dtype=float)
+zvrotxb_i = [0] * 52 # np.zeros(52, dtype=float)
+zwexbxb_i = [0] * 52 # np.zeros(52, dtype=float)
+zalpha_i = [0] * 52 # np.zeros(52, dtype=float)
+zvtor_i = [0] * 52 # np.zeros(52, dtype=float)
+zvpara_i = [0] * 52 # np.zeros(52, dtype=float)
+zvperp_i = [0] * 52 # np.zeros(52, dtype=float)
+zgradrsqrave_i = [0] * 52 # np.zeros(52, dtype=float)
+zgradrave_i = [0] * 52 # np.zeros(52, dtype=float)
+
 
 # page #13
 rminor13_i  = [0] * 52 # np.zeros(52, dtype=float)
@@ -313,6 +328,17 @@ grdte_list = []
 grdti_list = []
 grdpr_list = []
 grdq_list = []
+
+# page #12
+xbouni12_list = []
+zvrotxb_list = []
+zwexbxb_list = []
+zalpha_list = []
+zvtor_list = []
+zvpara_list = []
+zvperp_list = []
+zgradrsqrave_list = []
+zgradrave_list = []
 
 # page #13
 rminor13_list = []
@@ -868,6 +894,57 @@ for linei in lines1: #[:54270]:
         grdpr_list.append(grdpr_i.copy())
         grdq_list.append(grdq_i.copy())
 
+    # ---------------------- Check page #12 ------------------------------------ #
+    if linei.find("-12-  *** time") != -1:
+        Page12Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(13,timei))
+        continue
+    if Page12Found == 1 and HeaderPage12Found == 1 and (linei.find(' zvrotxb     zwexbxb') != -1):
+        continue
+    if Page12Found == 1 and HeaderPage12Found == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 52:
+            continue
+        # print(linei)
+        linei = CleanData(linei)
+        # print(linei)
+        temp1 = linei.split(' ')  # split string
+        # print(temp1)
+        temp2 = [float(k) for k in temp1 if k != '']
+        # print(temp2)
+
+        xbouni12_i[zonei - 1] = temp2[0]
+        zvrotxb_i[zonei - 1] = temp2[1]
+        zwexbxb_i[zonei - 1] = temp2[2]
+        zalpha_i[zonei - 1] = temp2[3]
+        zvtor_i[zonei - 1] = temp2[4]
+        zvpara_i[zonei - 1] = temp2[5]
+        zvperp_i[zonei - 1] = temp2[6]
+        zgradrsqrave_i[zonei - 1] = temp2[7]
+        zgradrave_i[zonei - 1] = temp2[8]
+
+    if Page12Found == 1 and linei.find("Variables used by callglf2db:") != -1:
+        HeaderPage12Found = 1
+        continue
+    if linei.find("-13-  *** time") != -1 and Page12Found == 1:
+        # print(linei)
+        Page12Found = 0
+        HeaderPage12Found = 0
+        zonei = 0
+        # append data
+        xbouni12_list.append(xbouni12_i.copy())
+        zvrotxb_list.append(zvrotxb_i.copy())
+        zwexbxb_list.append(zwexbxb_i.copy())
+        zalpha_list.append(zalpha_i.copy())
+        zvtor_list.append(zvtor_i.copy())
+        zvpara_list.append(zvpara_i.copy())
+        zvperp_list.append(zvperp_i.copy())
+        zgradrsqrave_list.append(zgradrsqrave_i.copy())
+        zgradrave_list.append(zgradrave_i.copy())
+
     # ---------------------- Check page #13 ------------------------------------ #
     if linei.find("-13-  *** time") != -1:
         Page13Found = 1
@@ -996,6 +1073,16 @@ grdte_arr = np.array(grdte_list)
 grdti_arr = np.array(grdti_list)
 grdpr_arr = np.array(grdpr_list)
 grdq_arr = np.array(grdq_list)
+
+xbouni12_arr = np.array(xbouni12_list)
+zvrotxb_arr = np.array(zvrotxb_list)
+zwexbxb_arr = np.array(zwexbxb_list)
+zalpha_arr = np.array(zalpha_list)
+zvtor_arr = np.array(zvtor_list)
+zvpara_arr = np.array(zvpara_list)
+zvperp_arr = np.array(zvperp_list)
+zgradrsqrave_arr = np.array(zgradrsqrave_list)
+zgradrave_arr = np.array(zgradrave_list)
 
 rminor13_arr = np.array(rminor13_list)
 gITG_arr = np.array(gITG_list)
@@ -1263,6 +1350,18 @@ for i in range(0, len(VariableList)):
                        FilenamePrefix)
     ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
+# Page #12:
+VariableList = [xbouni12_arr, zvrotxb_arr, zwexbxb_arr, zalpha_arr, zvtor_arr, zvpara_arr, zvperp_arr, zgradrsqrave_arr, zgradrave_arr]
+TitleList = ['xbouni(r,t)', 'zvrotxb(r,t)', 'zwexbxb(r,t)', 'zalpha(r,t)', 'zvtor(r,t)', 'zvpara(r,t)',
+             'zvperp(r,t)', 'zgradrsqrave(r,t)', 'zgradrave(r,t)']
+VariableNameList = ['xbouni', 'zvrotxb', 'zwexbxb', 'zalpha', 'zvtor', 'zvpara', 'zvperp', 'zgradrsqrave', 'zgradrave']
+
+for i in range(0, len(VariableList)):
+    Plot1DTime_FixRad(VariableList[i], Time1D, VariableNameList[i], RadList, TitleList[i], Option_Save,
+                      FilenamePrefix)
+    Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
+                       FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
 
 # Page #13: gamma_ITG
 title = 'gamma_ITG(r,t)'

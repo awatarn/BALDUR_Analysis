@@ -91,9 +91,11 @@ def Plot1DTime_FixTime(Prof2D, Time1D, VariableName, TimeList,title,  Option_Sav
         LowerTime = Time1D[index]
         labeli = "Time = %8.4e ms"%(LowerTime)
         plt.plot(Prof2D[index,:],label=labeli)
-        # print('LowerTime = ',LowerTime,'timei = ',timei,' ',Time1D.shape,' // ',Prof2D.shape)
-        # print('index = ',index)
-        # print('      = ',Prof2D[index,:])
+        if Time1D.shape[0] != Prof2D.shape[0]:
+            print("[ERROR] time records in Time1D and Prof2D are not consistent.")
+            print('LowerTime = ',LowerTime,'timei = ',timei,' ',Time1D.shape,' // ',Prof2D.shape)
+            print('index = ',index)
+            print('      = ',Prof2D[index,:])
 
     plt.title(title)
     plt.xlabel('Zone')
@@ -113,4 +115,5 @@ def CleanData(string1):
     string1 = string1.replace('lm', '  ')
     string1 = string1.replace('o ', '  ')
     string1 = string1.replace('- ', '  ')
+    string1 = string1.replace('-NaN', '  0')
     return string1
