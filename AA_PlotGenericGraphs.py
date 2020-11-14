@@ -66,6 +66,11 @@ HeaderDeuteriumFound = 0
 # page #3
 Page3Found = 0
 HeaderEnergyLossesFound = 0
+# page #4
+Page4Found = 0
+HeaderPage4AFound = 0 # k-e totl
+HeaderPage4BFound = 0 # NTV
+HeaderPage4CFound = 0 # Er
 # page #5 ( transport coefficients from theory)
 Page5Found = 0
 HeaderPage5Found = 0
@@ -120,6 +125,30 @@ alpha_heating_i  = [0] * 52 # np.zeros(52, dtype=float)
 other_heating_i  = [0] * 52 # np.zeros(52, dtype=float)
 total_gain_i  = [0] * 52 # np.zeros(52, dtype=float)
 ei_coupling_i  = [0] * 52 # np.zeros(52, dtype=float)
+# page #4
+# k-e totl
+zone4A_i  = [0] * 52 # np.zeros(52, dtype=float)
+radius4A_i  = [0] * 52 # np.zeros(52, dtype=float)
+ketotl_i  = [0] * 52 # np.zeros(52, dtype=float)
+kitotl_i  = [0] * 52 # np.zeros(52, dtype=float)
+vnware_i  = [0] * 52 # np.zeros(52, dtype=float)
+veware_i  = [0] * 52 # np.zeros(52, dtype=float)
+dhtotl_i  = [0] * 52 # np.zeros(52, dtype=float)
+ditotl_i  = [0] * 52 # np.zeros(52, dtype=float)
+# NTV
+radius4B_i  = [0] * 52 # np.zeros(52, dtype=float)
+wexba_i  = [0] * 52 # np.zeros(52, dtype=float)
+Diamagn_i  = [0] * 52 # np.zeros(52, dtype=float)
+vpolBt_NTV_i  = [0] * 52 # np.zeros(52, dtype=float)
+vtorBp_NTV_i  = [0] * 52 # np.zeros(52, dtype=float)
+sqpolfl_i  = [0] * 52 # np.zeros(52, dtype=float)
+rho_i  = [0] * 52 # np.zeros(52, dtype=float)
+# Er
+radius4C_i  = [0] * 52 # np.zeros(52, dtype=float)
+Er_i  = [0] * 52 # np.zeros(52, dtype=float)
+gradP_i  = [0] * 52 # np.zeros(52, dtype=float)
+vpolBt_Er_i  = [0] * 52 # np.zeros(52, dtype=float)
+vtorBp_Er_i  = [0] * 52 # np.zeros(52, dtype=float)
 # page #5
 rminor5_i = [0] * 52 # np.zeros(52, dtype=float)
 chie_i  = [0] * 52 # np.zeros(52, dtype=float)
@@ -249,6 +278,30 @@ alpha_heating_list = []
 other_heating_list = []
 total_gain_list = []
 ei_coupling_list = []
+# page #4
+# k-e totl
+zone4A_list = []
+radius4A_list = []
+ketotl_list = []
+kitotl_list = []
+vnware_list = []
+veware_list = []
+dhtotl_list = []
+ditotl_list = []
+# NTV
+radius4B_list = []
+wexba_list = []
+Diamagn_list = []
+vpolBt_NTV_list = []
+vtorBp_NTV_list = []
+sqpolfl_list = []
+rho_list = []
+# Er
+radius4C_list = []
+Er_list = []
+gradP_list = []
+vpolBt_Er_list = []
+vtorBp_Er_list = []
 # page #5
 rminor5_list = []
 chie_list = []
@@ -360,6 +413,11 @@ for linei in lines1: #[:54270]:
     # print("%5d %5d %5d %5d"%(Page1Found, Page2Found, Page3Found, Page13Found))
     # print("%5d %5d %5d %5d" % (HeaderTeFound, HeaderDeuteriumFound, HeaderEnergyLossesFound, HeaderGrowthRatesFound))
     # print("%5d"%(zonei))
+
+    # print("linei = %d, [%d] :%s"%(i,len(linei),linei))
+    if len(linei) <= 2:
+        # Skip this line, maybe it is an empty line
+        continue
 
     # --------------------- Check lthery(21) ---------------------------------- #
     if linei.find("lthery(21)") != -1:
@@ -563,6 +621,131 @@ for linei in lines1: #[:54270]:
         other_heating_list.append(other_heating_i.copy())
         total_gain_list.append(total_gain_i.copy())
         ei_coupling_list.append(ei_coupling_i.copy())
+
+    # ---------------------- Check page #4 ------------------------------------ #
+    if linei.find("- 4-  *** time") != -1:
+        Page4Found = 1
+        # timei = float(linei[51:64])
+        # time_list.append(timei)
+        # print("Page#%2d, time = %14f ms"%(6,timei))
+        continue
+    if Page4Found == 1 and linei.find("k-e totl    k-i totl      vnware") != -1:
+        HeaderPage4AFound = 1
+        continue
+    if Page4Found == 1 and HeaderPage4AFound == 1 and zonei < 52:
+        zonei += 1
+
+        if zonei == 52:
+            HeaderPage4AFound = 0
+            zonei = 0
+            continue
+        # print('zonei = :',zonei,' :',linei)
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        radius4A_i[zonei - 1] = temp2[1]
+        ketotl_i[zonei - 1] = temp2[2]
+        kitotl_i[zonei - 1] = temp2[3]
+        vnware_i[zonei - 1] = temp2[4]
+        veware_i[zonei - 1] = temp2[5]
+        dhtotl_i[zonei - 1] = temp2[6]
+        # print('temp2[6] = ',temp2[6])
+        ditotl_i[zonei - 1] = temp2[7]
+    if Page4Found == 1 and HeaderPage4AFound == 1 and linei.find("Predicted w_ExB by Kikuchi NTV model") != -1:
+        HeaderPage4AFound = 0
+        zonei = 0
+        continue
+    if Page4Found == 1 and linei.find("wexba     Dia.magn    vpol*Bt") != -1:
+        HeaderPage4BFound = 1
+        continue
+    if Page4Found == 1 and linei.find("Er     gradP") != -1:
+        # print("HeaderPage4CFound = 1")
+        HeaderPage4BFound = 0
+        HeaderPage4CFound = 1
+        zonei = 0
+        continue
+    if Page4Found == 1 and HeaderPage4BFound == 1 and zonei < 52:
+
+        zonei += 1
+
+        if zonei == 52:
+            HeaderPage4BFound = 0
+            zonei = 0
+            continue
+        linei = CleanData(linei)
+        temp1 = linei.split(' ')  # split string
+        # print("4B :",temp1)
+        temp2 = [float(k) for k in temp1 if k != '']
+
+        radius4B_i[zonei - 1] = temp2[0]
+        wexba_i[zonei - 1] = temp2[1]
+        Diamagn_i[zonei - 1] = temp2[2]
+        vpolBt_NTV_i[zonei - 1] = temp2[3]
+        vtorBp_NTV_i[zonei - 1] = temp2[4]
+        sqpolfl_i[zonei - 1] = temp2[5]
+        rho_i[zonei - 1] = temp2[6]
+
+    if Page4Found == 1 and HeaderPage4CFound == 1 and zonei < 52:
+
+        zonei += 1
+
+        if zonei == 52:
+            HeaderPage4CFound = 0
+            zonei = 0
+            continue
+        # print('Page4C(A) ',i,':',linei)
+        linei = CleanData(linei)
+        # print('Page4C(B) ', i, ':', linei)
+        temp1 = linei.split(' ')  # split string
+        # print("temp1 = ",temp1)
+        temp2 = [float(k) for k in temp1 if k != '']
+        # print(temp2)
+
+        radius4C_i[zonei - 1] = temp2[0]
+        Er_i[zonei - 1] = temp2[1]
+        gradP_i[zonei - 1] = temp2[2]
+        vpolBt_Er_i[zonei - 1] = temp2[3]
+        vtorBp_Er_i[zonei - 1] = temp2[4]
+    if Page4Found == 1 and linei.find("- 5-  *** time") != -1:
+        Page4Found = 0
+        HeaderPage4AFound = 0
+        HeaderPage4BFound = 0
+        HeaderPage4CFound = 0
+        zonei = 0
+
+        #append data
+        radius4A_list.append(radius4A_i.copy())
+        ketotl_list.append(ketotl_i.copy())
+        kitotl_list.append(kitotl_i.copy())
+        vnware_list.append(vnware_i.copy())
+        veware_list.append(veware_i.copy())
+        # print("dhtotl_i :",dhtotl_i)
+        dhtotl_list.append(dhtotl_i.copy())
+        # print("dhtot_list :",dhtotl_list)
+
+        ditotl_list.append(ditotl_i.copy())
+        # NTV
+        radius4B_list.append(radius4B_i.copy())
+        wexba_list.append(wexba_i.copy())
+        Diamagn_list.append(Diamagn_i.copy())
+        vpolBt_NTV_list.append(vpolBt_NTV_i.copy())
+        vtorBp_NTV_list.append(vtorBp_NTV_i.copy())
+        sqpolfl_list.append(sqpolfl_i.copy())
+        rho_list.append(rho_i.copy())
+        # Er
+        radius4C_list.append(radius4C_i.copy())
+        Er_list.append(Er_i.copy())
+        gradP_list.append(gradP_i.copy())
+        vpolBt_Er_list.append(vpolBt_Er_i.copy())
+        vtorBp_Er_list.append(vtorBp_Er_i.copy())
+
+        # print('Er_list = ',Er_list)
+        # print('vtorBp_Er_i = ',vtorBp_Er_i)
+        # exit(0)
+
+
+
 
     # ---------------------- Check page #5 ------------------------------------ #
     if linei.find("- 5-  *** time") != -1:
@@ -1002,6 +1185,29 @@ nImp1_arr = np.array(nImp1_list)
 nImp2_arr = np.array(nImp2_list)
 nImp3_arr = np.array(nImp3_list)
 zeff_arr = np.array(zeff_list)
+
+radius4A_arr = np.array(radius4A_list)
+ketotl_arr = np.array(ketotl_list)
+kitotl_arr = np.array(kitotl_list)
+vnware_arr = np.array(vnware_list)
+veware_arr = np.array(veware_list)
+dhtotl_arr = np.array(dhtotl_list)
+ditotl_arr = np.array(ditotl_list)
+# NTV
+radius4B_arr = np.array(radius4B_list)
+wexba_arr = np.array(wexba_list)
+Diamagn_arr = np.array(Diamagn_list)
+vpolBt_NTV_arr = np.array(vpolBt_NTV_list)
+vtorBp_NTV_arr = np.array(vtorBp_NTV_list)
+sqpolfl_arr = np.array(sqpolfl_list)
+rho_arr = np.array(rho_list)
+# Er
+radius4C_arr = np.array(radius4C_list)
+Er_arr = np.array(Er_list)
+gradP_arr = np.array(gradP_list)
+vpolBt_Er_arr = np.array(vpolBt_Er_list)
+vtorBp_Er_arr = np.array(vtorBp_Er_list)
+
 rminor5_arr = np.array(rminor5_list)
 chie_arr = np.array(chie_list)
 chii_arr = np.array(chii_list)
@@ -1193,6 +1399,34 @@ VariableName = 'Zeff'
 Plot1DTime_FixRad(zeff_arr, Time1D, VariableName, RadList, title, Option_Save,FilenamePrefix)
 Plot1DTime_FixTime(zeff_arr, Time1D, VariableName, TimeList, title, Option_Save,FilenamePrefix)
 ImshowPlot(zeff_arr, Time1D, VariableName, title, Option_Save,FilenamePrefix, Time0Index=time0lower_index)
+
+# Page #4:
+VariableList4A = [ketotl_arr, kitotl_arr, vnware_arr, veware_arr, dhtotl_arr, ditotl_arr]
+TitleList4A = ['ketotl(r,t)', 'kitotl(r,t)', 'vnware(r,t)', 'veware(r,t)', 'dhtotl(r,t)', 'ditotl(r,t)']
+VariableNameList4A = ['ketotl', 'kitotl', 'vnware', 'veware', 'dhtotl', 'ditotl']
+
+VariableList4B = [radius4B_arr, wexba_arr, Diamagn_arr, vpolBt_NTV_arr, vtorBp_NTV_arr, sqpolfl_arr,]
+TitleList4B = ['radius4B(r,t)', 'wexba', 'Diamagn(r,t)', 'vpolBt_NTV(r,t)', 'vtorBp_NTV(r,t)', 'sqpolfl(r,t)']
+VariableNameList4B = ['radius4B', 'wexba', 'Diamagn', 'vpolBt_NTV', 'vtorBp_NTV', 'sqpolfl']
+
+VariableList4C = [radius4C_arr, Er_arr, gradP_arr, vpolBt_Er_arr, vtorBp_Er_arr]
+TitleList4C = ['radius4C(r,t)', 'Er(r,t)', 'gradP(r,t)', 'vpolBt_Er(r,t)', 'vtorBp_Er(r,t)']
+VariableNameList4C = ['radius4C', 'Er', 'gradP', 'vpolBt_Er', 'vtorBp_Er']
+
+VariableList = VariableList4A + VariableList4B + VariableList4C
+TitleList = TitleList4A + TitleList4B + TitleList4C
+VariableNameList = VariableNameList4A + VariableNameList4B + VariableNameList4C
+
+for i in range(0, len(VariableList)):
+    # print(VariableNameList[i])
+    # print('length = %d'%(len(VariableList[i])))
+    # print(VariableList[i])
+    Plot1DTime_FixRad(VariableList[i], Time1D, VariableNameList[i], RadList, TitleList[i], Option_Save,
+                      FilenamePrefix)
+    Plot1DTime_FixTime(VariableList[i], Time1D, VariableNameList[i], TimeList, TitleList[i], Option_Save,
+                       FilenamePrefix)
+    ImshowPlot(VariableList[i], Time1D, VariableNameList[i], TitleList[i], Option_Save, FilenamePrefix, Time0Index=time0lower_index)
+
 
 # Page #5: chi-elec
 title = 'chi-e(r,t)'

@@ -116,4 +116,6 @@ def CleanData(string1):
     string1 = string1.replace('o ', '  ')
     string1 = string1.replace('- ', '  ')
     string1 = string1.replace('-NaN', '  0')
+    string1 = string1.replace(' NaN', '  0')
+    string1 = string1.replace('\n', ' ')
     return string1
