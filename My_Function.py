@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from cycler import cycler
 import numpy as np
+import csv
 
 def ImshowPlot(Prof2D, Time1D, VariableName, title, Option_Save=0, FilenamePrefix='test', Time0Index=0):
     # Prof2D = Te_arr
@@ -119,3 +120,37 @@ def CleanData(string1):
     string1 = string1.replace(' NaN', '  0')
     string1 = string1.replace('\n', ' ')
     return string1
+
+def writeCsvFile(fname, data, *args, **kwargs):
+    """
+    @param fname: string, name of file to write
+    @param data: list of list of items
+
+    Write data to file
+    """
+    mycsv = csv.writer(open(fname, 'w'), *args, **kwargs)
+    for row in data:
+        mycsv.writerow(row)
+
+def SaveCsvFile(Time1D, VariableList, VariableNameList, Prefix='', SaveTimeOption=0):
+    for i in range(0, len(VariableList)):
+        zone_list = range(0, VariableList[i].shape[1])
+        prof_list = np.vstack([zone_list,VariableList[i]]).T
+        prof_list = prof_list.tolist()
+        t_list = [0] + Time1D.tolist()
+        t_list = [str(s) + ' ms' for s in t_list]
+        combined_list = [t_list, *prof_list]
+        csvfilename = Prefix + '_' + VariableNameList[i] + '.csv'
+        print('Export %15s to %20s'%(VariableNameList[i], csvfilename))
+        # writeCsvFile(csvfilename, combined_list)
+        mycsv = csv.writer(open(csvfilename, 'w'))
+        for row in combined_list:
+            mycsv.writerow(row)
+    if SaveTimeOption == 1:
+        csvfilename = Prefix + '_' + 'TimeList.csv'
+        mycsv = csv.writer(open(csvfilename, 'w'))
+        t_list = [0] + Time1D.tolist()
+        mycsv.writerow(t_list)
+        # for row in t_list:
+        #     mycsv.writerow(row)
+        print('Export %15s to %20s' % ('Time1D', csvfilename))
