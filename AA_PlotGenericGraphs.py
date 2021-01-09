@@ -1358,6 +1358,19 @@ elif lthery21 == 8:
     VariableNameList6 = ['Xi_Bohm', 'Xi_gBohm', 'Xi_Mixed', 'Xi_Neo', 'Xi_Empirc', 'Xi_Total']
     TitleList6 = [str(s) + '(r,t)' for s in VariableNameList6]
 
+# Page #7
+if lthery21 == 10: # MMM
+    VariableList7 =     [theig_arr   , therb_arr   , thekb_arr   , theeg_arr, thetb_arr,
+                         xethe_arr   , neocle_arr  , empirce_arr , xetot_arr]
+    TitleList7 =        ['theig(r,t)'   , 'therb(r,t)'   , 'thekb(r,t)'   , 'theeg(r,t)', 'thetb(r,t)',
+                         'xethe(r,t)'   , 'neocle(r,t)'  , 'empirce(r,t)' , 'xetot(r,t)']
+    VariableNameList7 = ['theig'   , 'therb'   , 'thekb'   , 'theeg', 'thetb',
+                         'xethe'   , 'neocle'  , 'empirce' , 'xetot']
+elif lthery21 == 8: # Mixed B/gB
+    VariableList7 =     [Xe_Bohm_arr   , Xe_gBohm_arr   , Xe_Mixed_arr   , Xe_Neo_arr   , Xe_Empirc_arr   , Xe_Total_arr]
+    TitleList7 =        ['Xe_Bohm(r,t)', 'Xe_gBohm(r,t)', 'Xe_Mixed(r,t)', 'Xe_Neo(r,t)', 'Xe_Empirc(r,t)', 'Xe_Total(r,t)']
+    VariableNameList7 = ['Xe_Bohm'     , 'Xe_gBohm'     , 'Xe_Mixed'     , 'Xe_Neo'     , 'Xe_Empirc'     , 'Xe_Total']
+
 # Page #8:
 if lthery21 == 10: # MMM
     VariableList8 =     [thdig_arr   , thdrb_arr   , thdkb_arr   , dhthe_arr]
@@ -1397,11 +1410,11 @@ TitleList13 = [str(s) + '(r,t)' for s in VariableNameList13]
 # All pages
 VariableList = VariableList1 + VariableList2 \
                + VariableList4A + VariableList4B + VariableList4C \
-               + VariableList5 + VariableList6 + VariableList8 \
+               + VariableList5 + VariableList6 + VariableList7 + VariableList8 \
                + VariableList9 + VariableList10 + VariableList12 + VariableList13
 VariableNameList = VariableNameList1 + VariableNameList2 \
                    + VariableNameList4A + VariableNameList4B + VariableNameList4C \
-                   + VariableNameList5 + VariableNameList6 + VariableNameList8 \
+                   + VariableNameList5 + VariableNameList6 + VariableNameList7 + VariableNameList8 \
                    + VariableNameList9 + VariableNameList10 + VariableNameList12 + VariableNameList13
 TitleList = [str(s) + '(r,t)' for s in VariableNameList]
 
